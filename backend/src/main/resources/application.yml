@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: mentortrack-backend
+  profiles:
+    active: demo
+
+  servlet:
+    multipart:
+      max-file-size: 15MB
+      max-request-size: 15MB
+
+server:
+  port: 8080
+
+mentortrack:
+  jwt:
+    # Demo-only secret. MUST be overridden via MENTORTRACK_JWT_SECRET env var in any real deployment.
+    secret: ${MENTORTRACK_JWT_SECRET:demo-only-insecure-secret-change-me-before-any-real-deployment-0123456789}
+    expiration-minutes: 480
+  storage:
+    # Local encrypted document storage root.
+    root-dir: ${MENTORTRACK_STORAGE_DIR:./storage}
+    # AES key for at-rest encryption of uploaded documents. MUST be overridden in any real deployment.
+    encryption-key: ${MENTORTRACK_STORAGE_KEY:demo-only-insecure-storage-key-32bytes!!}
+  ocr:
+    # Path to tessdata directory. If Tesseract is not installed, OCR upload endpoints
+    # will return a clear error instead of crashing the app.
+    tessdata-path: ${MENTORTRACK_TESSDATA_PATH:/usr/share/tesseract-ocr/5/tessdata}
+  pdf:
+    template-page1: templates/mentor-card-page1.pdf
+    template-page2: templates/mentor-card-page2.pdf
+  seed:
+    enabled: true

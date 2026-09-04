@@ -1,0 +1,16 @@
+# "mysql" profile: real MySQL-backed deployment, per the spec's DB choice.
+# Activate with: --spring.profiles.active=mysql
+spring:
+  datasource:
+    url: ${MENTORTRACK_DB_URL:jdbc:mysql://localhost:3306/mentortrack?useSSL=false&serverTimezone=UTC}
+    username: ${MENTORTRACK_DB_USER:mentortrack}
+    password: ${MENTORTRACK_DB_PASSWORD:mentortrack}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
