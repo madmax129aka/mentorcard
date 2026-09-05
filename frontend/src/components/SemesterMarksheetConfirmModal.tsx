@@ -9,22 +9,24 @@ interface SubjectRow {
 
 interface Props {
   extraction: OcrExtractionResponse;
-  onConfirm: (semesterNumber: number, rows: SubjectRow[]) => Promise<void>;
+  semesterNumber: number;
+  onConfirm: (rows: SubjectRow[]) => Promise<void>;
   onCancel: () => void;
 }
 
 /**
  * Semester marksheets don't carry machine-readable subject codes, so OCR can only extract raw
- * subject names + marks (shown here as a reference). The student picks the semester and enters
- * the subject code + Uni. Marks + Cleared-in date for each row before saving — per spec, OCR
- * output is never silently auto-committed.
+ * subject names + marks (shown here as a reference). The student enters the subject code + Uni.
+ * Marks + Cleared-in date for each row before saving — per spec, OCR output is never silently
+ * auto-committed. The semester itself is fixed by which per-semester card the student uploaded to
+ * (there is no semester picker here), so this only ever confirms results for that one semester.
  */
 export function SemesterMarksheetConfirmModal({
   extraction,
+  semesterNumber,
   onConfirm,
   onCancel,
 }: Props) {
-  const [semesterNumber, setSemesterNumber] = useState("1");
   const [rows, setRows] = useState<SubjectRow[]>(
     extraction.subjects.length > 0
       ? extraction.subjects.map((s) => ({
@@ -52,7 +54,7 @@ export function SemesterMarksheetConfirmModal({
     setSaving(true);
     try {
       const validRows = rows.filter((r) => r.subjectCode.trim() !== "");
-      await onConfirm(Number(semesterNumber), validRows);
+      await onConfirm(validRows);
     } finally {
       setSaving(false);
     }
@@ -62,28 +64,13 @@ export function SemesterMarksheetConfirmModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
       <div className="card w-full max-w-lg">
         <h3 className="mb-1 text-lg font-semibold text-navy-800">
-          Confirm Semester Results
+          Confirm Semester {semesterNumber} Results
         </h3>
         <p className="mb-4 text-sm text-gray-500">
           OCR extracted the marks below as reference. Enter each subject's
-          code (as listed on your dashboard), Uni. Marks, and Cleared-in date,
-          then save.
+          code (as listed on your dashboard for Semester {semesterNumber}),
+          Uni. Marks, and Cleared-in date, then save.
         </p>
-
-        <label className="mb-1 block text-xs font-medium text-gray-600">
-          Semester Number
-        </label>
-        <select
-          value={semesterNumber}
-          onChange={(e) => setSemesterNumber(e.target.value)}
-          className="mb-4 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
-        >
-          {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
-            <option key={n} value={n}>
-              Semester {n}
-            </option>
-          ))}
-        </select>
 
         <div className="mb-3 max-h-60 space-y-2 overflow-y-auto">
           {rows.map((row, idx) => (

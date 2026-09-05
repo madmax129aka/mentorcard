@@ -23,8 +23,16 @@ mentortrack:
     # AES key for at-rest encryption of uploaded documents. MUST be overridden in any real deployment.
     encryption-key: ${MENTORTRACK_STORAGE_KEY:demo-only-insecure-storage-key-32bytes!!}
   ocr:
-    # Path to tessdata directory. If Tesseract is not installed, OCR upload endpoints
-    # will return a clear error instead of crashing the app.
+    # Path to the directory containing eng.traineddata. If this path is wrong or Tesseract isn't
+    # installed, OCR upload endpoints now return a clear 503 with an actionable message instead of
+    # crashing the app (see OcrService for details on why that fix was needed).
+    # Common tessdata locations by platform, if the default below doesn't match your machine:
+    #   Debian/Ubuntu (apt-get install tesseract-ocr):      /usr/share/tesseract-ocr/5/tessdata
+    #                                                    or  /usr/share/tesseract-ocr/4.00/tessdata
+    #   macOS (brew install tesseract):                     /opt/homebrew/share/tessdata
+    #                                                    or  /usr/local/share/tessdata (Intel Macs)
+    #   Windows (default installer path):                   C:\Program Files\Tesseract-OCR\tessdata
+    # Find yours with: find / -name "eng.traineddata" 2>/dev/null   (or `locate eng.traineddata`)
     tessdata-path: ${MENTORTRACK_TESSDATA_PATH:/usr/share/tesseract-ocr/5/tessdata}
   pdf:
     template-page1: templates/mentor-card-page1.pdf

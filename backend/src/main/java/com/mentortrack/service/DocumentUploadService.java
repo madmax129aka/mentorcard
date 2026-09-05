@@ -88,7 +88,7 @@ public class DocumentUploadService {
     /** Student confirms/edits the 10th/12th/Diploma OCR result -> persist percentage on Student, mark Document confirmed. */
     @Transactional
     public void confirmMarksheet(String regNo, DocumentType type, ConfirmMarksheetRequest request) {
-        if (type == DocumentType.SEMESTER_MARKSHEET) {
+        if (type.isSemesterMarksheet()) {
             throw new BadRequestException("Use the semester-marksheet confirm endpoint for semester results");
         }
         Student student = requireStudent(regNo);
@@ -111,17 +111,25 @@ public class DocumentUploadService {
         documentRepository.save(document);
     }
 
-    /** Student confirms/edits the semester marksheet OCR result -> upserts Mark rows (source=OCR). */
+    /**
+     * Student confirms/edits one semester's marksheet OCR result -> upserts Mark rows (source=OCR).
+     * {@code type} must be one of the SEMESTER_n_MARKSHEET constants; the semester number is taken
+     * from that document type, not from the request body.
+     */
     @Transactional
-    public void confirmSemesterMarksheet(String regNo, ConfirmSemesterMarksheetRequest request) {
+    public void confirmSemesterMarksheet(String regNo, DocumentType type, ConfirmSemesterMarksheetRequest request) {
+        if (!type.isSemesterMarksheet()) {
+            throw new BadRequestException("Use the marksheet confirm endpoint for non-semester documents");
+        }
+        int semesterNumber = type.getSemesterNumber();
+
         Student student = requireStudent(regNo);
-        Document document = documentRepository.findByStudentAndType(student, DocumentType.SEMESTER_MARKSHEET)
-                .orElseThrow(() -> new NotFoundException("No uploaded semester marksheet to confirm"));
+        Document document = documentRepository.findByStudentAndType(student, type)
+                .orElseThrow(() -> new NotFoundException("No uploaded marksheet to confirm for Semester " + semesterNumber));
         if (!document.getId().equals(request.getDocumentId())) {
             throw new BadRequestException("documentId does not match the most recent upload");
         }
 
-        int semesterNumber = request.getSemesterNumber();
         List<ConfirmSemesterMarksheetRequest.SubjectResultEntry> entries = request.getSubjects();
         if (entries == null || entries.isEmpty()) {
             throw new BadRequestException("No subject results provided to confirm");

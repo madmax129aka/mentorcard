@@ -105,14 +105,22 @@ of crashing — the rest of the app keeps working, and Aadhaar/PAN uploads
    password-change modal appears (spec requirement) → set a new password.
 4. On the **Student Dashboard**, see CAT marks/GPA populated, and the
    document checklist.
-5. Go to **Upload Documents** → try the 10th/12th/Diploma/Semester marksheet
-   flow (a sample demo image is at
+5. Go to **Upload Documents** → try the 10th/12th/Diploma flow, or any one of
+   the 8 independent **Semester 1–8 Marksheet** upload cards (each semester
+   has its own upload/confirm slot — uploading Semester 3 has no effect on
+   Semester 1, etc.) (a sample demo image is at
    `backend/src/main/resources/seed-assets/sample-marksheet-10th.png` — since
    this repo's sandbox couldn't install Tesseract to generate a *real* OCR'd
    sample, this is a clean synthetic mark-sheet-style image for demoing the
    upload → OCR → confirm-modal → save flow end to end) — review/edit the
    OCR-extracted values in the confirm modal, then save. Try Aadhaar/PAN for
    the plain-upload flow.
+   - **If OCR fails with a 503** ("OCR is not available on this server..."),
+     Tesseract isn't installed or `MENTORTRACK_TESSDATA_PATH` doesn't point
+     at a directory containing `eng.traineddata`. See the comment above
+     `mentortrack.ocr.tessdata-path` in `application.yml` for common install
+     locations per OS, or run `find / -name "eng.traineddata" 2>/dev/null` to
+     locate yours.
 6. Back on the dashboard, click **Download Mentor Card PDF** — this calls
    PDFBox to overlay all collected data onto the real template PDFs bundled
    in `backend/src/main/resources/templates/` and returns the merged 2-page

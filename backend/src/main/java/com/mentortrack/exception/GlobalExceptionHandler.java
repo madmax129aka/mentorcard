@@ -43,6 +43,18 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, message);
     }
 
+    /**
+     * NOTE on why there is no {@code @ExceptionHandler(Error.class)} here: Spring's
+     * DispatcherServlet.doDispatch() catches raw {@link Throwable}s (including {@link Error}s such
+     * as Tess4j/Tesseract's native "Invalid memory access" failure) and wraps them into a plain
+     * {@code Exception} with the message "Handler dispatch failed: ..." *before* the
+     * {@code @ExceptionHandler} resolver chain ever runs — which is exactly the confusing message
+     * this app used to surface to the client. Because of that wrapping, an {@code Error.class}
+     * handler here would never actually be invoked; it would be dead code. The real fix has to stop
+     * the Error before it leaves application code in the first place — see
+     * {@code OcrService.extractText}, which now catches {@link Throwable} around the native
+     * Tesseract call specifically and converts it into a clean {@link OcrUnavailableException}.
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneric(Exception ex) {
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error: " + ex.getMessage());

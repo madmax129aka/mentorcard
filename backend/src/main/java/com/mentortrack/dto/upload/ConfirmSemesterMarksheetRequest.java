@@ -4,14 +4,15 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-/** What the student confirms/edits after reviewing OCR-extracted semester marksheet data. */
+/**
+ * What the student confirms/edits after reviewing OCR-extracted semester marksheet data. The
+ * semester number itself is no longer part of this payload — it is implied by which
+ * SEMESTER_n_MARKSHEET document type/endpoint the student uploaded to.
+ */
 public class ConfirmSemesterMarksheetRequest {
 
     @NotNull
     private Long documentId;
-
-    @NotNull
-    private Integer semesterNumber;
 
     private List<SubjectResultEntry> subjects;
 
@@ -51,14 +52,6 @@ public class ConfirmSemesterMarksheetRequest {
 
     public void setDocumentId(Long documentId) {
         this.documentId = documentId;
-    }
-
-    public Integer getSemesterNumber() {
-        return semesterNumber;
-    }
-
-    public void setSemesterNumber(Integer semesterNumber) {
-        this.semesterNumber = semesterNumber;
     }
 
     public List<SubjectResultEntry> getSubjects() {
