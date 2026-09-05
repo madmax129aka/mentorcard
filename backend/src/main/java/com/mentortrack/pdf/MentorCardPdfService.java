@@ -128,10 +128,18 @@ public class MentorCardPdfService {
             PDFont font = PDType1Font.HELVETICA;
             cs.setNonStrokingColor(0f, 0f, 0f);
 
-            float[] rowTops = layout.rowTops();
-            for (int i = 0; i < subjectMarks.size() && i < rowTops.length; i++) {
-                SubjectMarkView m = subjectMarks.get(i);
-                float baselineY = rowTops[i] - MentorCardCoordinates.ROW_TEXT_BASELINE_OFFSET;
+            // Look up each subject's row by its subject code (not by list position/index): a
+            // student missing a Mark row for one subject must not shift every other subject's
+            // values into the wrong row. The baseline used is the exact y where that subject's own
+            // name is already printed on the template, so marks always land in the correct row
+            // regardless of how many lines that subject's name wraps to.
+            for (SubjectMarkView m : subjectMarks) {
+                Float baselineY = layout.baselineFor(m.subjectCode());
+                if (baselineY == null) {
+                    // Subject code not recognized for this semester's template layout — skip
+                    // rather than guess a position, so we never draw into the wrong row.
+                    continue;
+                }
 
                 drawText(cs, font, MentorCardCoordinates.FONT_SIZE_MARKS, columns.cat1(), baselineY, formatMark(m.cat1()));
                 drawText(cs, font, MentorCardCoordinates.FONT_SIZE_MARKS, columns.cat2(), baselineY, formatMark(m.cat2()));
