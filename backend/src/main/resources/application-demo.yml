@@ -1,0 +1,20 @@
+# "demo" profile: runs against an in-memory H2 database so the whole
+# import -> upload -> download flow can be demoed with zero external setup.
+# Switch to the "mysql" profile (see application-mysql.yml) for a real deployment.
+spring:
+  datasource:
+    url: jdbc:h2:mem:mentortrack;DB_CLOSE_DELAY=-1;MODE=MySQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
